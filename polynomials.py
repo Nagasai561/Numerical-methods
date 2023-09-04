@@ -1,5 +1,5 @@
 import math as m
-
+import other_imp
 
 class polynomial:
     def __init__(self, coefficients):   #constructor

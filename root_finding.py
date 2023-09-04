@@ -58,3 +58,17 @@ def secant_method(function, guess1, guess2, tolerance, max_iterations):
 
     return guess2
 
+def false_position(function, guess1, guess2, tolerance, max_iterations):
+    iteration = 0
+    while(iteration < max_iterations):
+        iteration += 1
+        function_derivative = (function(guess2)-function(guess1))/(guess2-guess1)
+        new_guess = guess2 - (function(guess2)/function_derivative)
+        if(function(new_guess)*function(guess2) < 0):
+            guess1 = guess2
+        guess2 = new_guess
+        if(abs(guess2-guess1) < tolerance):
+            return guess2
+
+    return guess2
+
