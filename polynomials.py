@@ -79,24 +79,3 @@ def lagrange_polynomial(x_list, y_list): #return lagrange interpolating polynomi
     
     return result
 
-def forward_difference(x_list, y_list, x): # takes in x-coords and y-coords and tha value 'x' at which you want to approximate
-    coeffs = [] # a list [f(x0), delta f(x0), delta^2 f(x0)]
-    temp = y_list.copy()
-    n = len(y_list)
-    for i in range(n):
-        coeffs.append(temp[0])
-        for i in range(len(temp)-1):
-            temp[i] = temp[i+1]-temp[i]
-        temp.pop()
-    
-    result = 0
-    h = x_list[1]-x_list[0]
-    s = (x-x_list[0])/h
-    for i in range(0, n):
-        result += binomial_coefficient(s, i)*coeffs[i]
-    
-    return result
-
-def backward_difference(x_list, y_list, x):
-    return forward_difference(x_list[::-1], y_list[::-1], x)
-

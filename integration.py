@@ -1,3 +1,5 @@
+import math as m
+
 def rectangular_rule(function, left, right):
     value = function(left)
     h = (right-left)
@@ -19,16 +21,21 @@ def simpson_rule(function, left, right):
     expr = function(left) + 4*function(middle) + function(right)
     return expr*(h/3)
 
-def composite_trapezoidal_rule(function, left, right, num_intervals):
+def composite_rule(rule, function, left, right, num_intervals):
     result = 0
     step = (right-left)/num_intervals
     for i in range(1, num_intervals+1):
-        result += trapezoidal_rule(function, left+(step*(i-1)), left+(step*(i)))
+        result += rule(function, left+(step*(i-1)), left+(step*i))
     return result
 
-def composite_simpson_rule(function, left, right, num_intervals):
-    result = 0
-    step = (right-left)/num_intervals
-    for i in range(1, num_intervals+1):
-        result += simpson_rule(function, left+(step*(i-1)), left+(step*(i)))
-    return result
+def gauss_quadrature_onepoint(function, left, right):
+    def modified_input(input):
+        return (input*(right-left) + (right+left))/2
+    return 2*function(modified_input(left))
+
+def gauss_quadrature_twopoints(function, left, right):
+    def modified_input(input):
+        return (input*(right-left) + (right+left))/2
+    first_term = function(modified_input(0.577350269))
+    second_term = function(modified_input(-0.577350269))
+    return first_term + second_term
