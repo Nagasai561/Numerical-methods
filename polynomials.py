@@ -1,5 +1,4 @@
 import math as m
-import other_imp
 
 class polynomial:
     def __init__(self, coefficients):   #constructor
@@ -93,10 +92,27 @@ def forward_difference(x_list, y_list, x): # takes in x-coords and y-coords and 
     h = x_list[1]-x_list[0]
     s = (x-x_list[0])/h
     for i in range(0, n):
-        result += binomial_coefficient(s, i)*coeffs[i]
+        result +=m.comb(s, i)*coeffs[i]
     
     return result
 
 def backward_difference(x_list, y_list, x):
     return forward_difference(x_list[::-1], y_list[::-1], x)
+
+
+def legendre_polynomial(n):
+    poly = polynomial([-1, 0, 1])
+    for i in range(n-1):
+        poly = poly*poly
+    for i in range(n):
+        poly = poly.derivative()
+    k = (2**n)*(m.factorial(n))
+    coeff = poly.coefficients
+    for i in range(poly.degree+1):
+        coeff[i] = coeff[i]/k
+    return polynomial(coeff)
+
+
+
+
 
