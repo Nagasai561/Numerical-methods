@@ -100,7 +100,7 @@ def backward_difference(x_list, y_list, x):
     return forward_difference(x_list[::-1], y_list[::-1], x)
 
 
-def legendre_polynomial(n):
+def legendre_polynomial(n): #where n is the nth legendre polynomial (n > 0)
     poly = polynomial([-1, 0, 1])
     for i in range(n-1):
         poly = poly*poly
