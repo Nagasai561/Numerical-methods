@@ -1,4 +1,6 @@
 import root_finding
+import linear_algebra
+import math
 
 REAL_COMPARISON_ERROR_TOLERANCE = 0.000001
 FIXED_POINT_ITERATION_TOLERANCE = 0.0000001
@@ -103,7 +105,7 @@ def adam_moulton_order4(f, xy_o, h, final_x, *args):  #if you want to pass addit
 
 
 def predictor_corrector(f, xy_o, h, final_x, *args):     #if you want to pass additional [ti, wi]
-    xy = xy_o.copy()                                    #you must pass it like [[t1, w1], [t2, w2], [t3, w3]]
+    xy = xy_o.copy()                                    #you must pass it like [t1, w1], [t2, w2], [t3, w3]
     if(len(args) == 0):                                 
         xy0 = xy
         xy1 = [xy[0]+h, runge_kutta_order4(f, xy, h, xy[0]+h)]
@@ -127,7 +129,7 @@ def predictor_corrector(f, xy_o, h, final_x, *args):     #if you want to pass ad
     return xy3[1]
 
     
-def runge_kutta_order4_higher(f_list, xy_o, h, final_x): # xy_0 is [t0, x1, x2, ...] = u
+def runge_kutta_order4_for_multi_variable(f_list, xy_o, h, final_x): # xy_0 is [t0, x1, x2, ...] = u
     xy = xy_o.copy()                                    # fi is the function related to xi
     n = len(xy)                                          # each fi should take u as argument
     while abs(xy[0]-final_x) > REAL_COMPARISON_ERROR_TOLERANCE:
@@ -165,5 +167,89 @@ def runge_kutta_order4_higher(f_list, xy_o, h, final_x): # xy_0 is [t0, x1, x2, 
     return xy
 
 
+#y'' = p(x) y' + q(x) y + r(x)
+# f should take [t, u1, u2] where u1 = y, u2 = y'
+#xy_o = [t(0), y(0), y'(0)]
+def runge_kutta_order4_for_second_order(f, xy_0, h, final_x):   
+    y_dash = lambda u: u[2]
+    f_list = [y_dash, f]
+    return runge_kutta_order4_for_multi_variable(f_list, xy_0, h, final_x)
+
 
 #--------------------------------------Boundary value problems-------------------------
+
+#question to be solved y'' = p(x) y' + q(x) y + r(x) with y(a) = alpha and y(b) = beta
+#ini_cond_1 = [a, alpha] and ini_cond_2 = [b, beta]
+#func1 should be p(x) y' + q(x) y + r(x)
+#func2 should be p(x) y' + q(x) y
+#both should take [t, y, y']
+def linear_shooting_method(func1, func2, ini_cond_1, ini_cond_2, h, final_x):
+    sol1 = runge_kutta_order4_for_second_order(func1, [*ini_cond_1, 0], h, final_x)[1]
+    b1 = runge_kutta_order4_for_second_order(func1,[*ini_cond_1, 0], h, ini_cond_2[0])[1]
+    sol2 = runge_kutta_order4_for_second_order(func2, [ini_cond_1[0], 0, 1], h, final_x)[1]
+    b2 = runge_kutta_order4_for_second_order(func2, [ini_cond_1[0], 0, 1], h, ini_cond_2[0])[1]
+    res = sol1
+    res += ((ini_cond_2[1]-b1)/b2)*sol2
+    return res
+
+
+
+#y'' = f(x, y, y')
+#ini_cond_1 and ini_cond_2 are initial conditions respectively
+#t_guess1 and t_guess2 are initial guesses
+def non_linear_shooting_secant(f, ini_cond_1, ini_cond_2, h, final_x, t_guess1, t_guess2):
+    def temp(t):
+        return runge_kutta_order4_for_second_order(f, [*ini_cond_1, t], h, ini_cond_2[0])[1]-ini_cond_2[1]
+    
+    t = root_finding.secant_method(temp, t_guess1, t_guess2, FIXED_POINT_ITERATION_TOLERANCE, MAX_FIXED_POINT_ITERATIONS)
+    return runge_kutta_order4_for_second_order(f, [*ini_cond_1, t], h, final_x)
+
+
+
+#iterations is the number of times you want to improve your guess for t = y'(a)
+#y'' = f(x, y, y')
+#df_dy (a function) is partial differentiation of f wrt y: it takes in the parameters [x, y, y']
+#df_dydash (a function) is partial differentiation of f wrt y': it takes in the paramenters [x, y, y']
+def non_linear_shooting_newton(f, ini_cond_1, ini_cond_2, h, iterations, df_dy, df_dydash, t_guess, final_x):
+    for iter in range(iterations):
+        curr_sol = runge_kutta_order4_for_second_order(f, [*ini_cond_1, t_guess], h, ini_cond_2[0])
+        def z(x):
+            res = df_dy(curr_sol)*x[1]
+            res += df_dydash(curr_sol)*x[2]
+            return res
+        z = runge_kutta_order4_for_second_order(z, [ini_cond_1[0], 0, 1], h, ini_cond_2[0])[1]
+        t_guess = (t_guess)-(curr_sol[1]-ini_cond_2[1])/(z)
+
+    return runge_kutta_order4_for_second_order(f, [*ini_cond_1, t_guess], h, final_x)
+
+
+    
+
+
+#y'' = p(x) y' + q(x) y + r(x)
+#n is the size of matrix you want to create
+#this divides the region [a, b] into n+1 equal intervals
+def finite_difference_method(p, q, r, ini_cond_1, ini_cond_2, n):
+    h = (ini_cond_2[0]-ini_cond_1[0])/(n+1)
+    matrix = [[0]*n for i in range(n)]
+    matrix[0][0] = 2+(h**2)*q(ini_cond_1[0]+h)
+    matrix[0][1] = -1+(h/2)*(p(ini_cond_1[0]+h))
+    matrix[n-1][n-1] = 2+(h**2)*q(ini_cond_2[0]-h)
+    matrix[n-1][n-2] = -1-(h/2)*p(ini_cond_2[0]-h)
+    for i in range(1, n-1):
+        matrix[i][i-1] = -1-(h/2)*p(ini_cond_1[0]+(i+1)*h)
+        matrix[i][i] = 2+(h**2)*(q(ini_cond_1[0]+(i+1)*h))
+        matrix[i][i+1] = -1 + (h/2)*(p(ini_cond_1[0]+(i+1)*h))
+
+    column_mat = [0]*n
+    column_mat[0] = -(h**2)*(r(ini_cond_1[0]+h)) + (1 + (h/2)*(p(ini_cond_1[0]+h)))*ini_cond_1[1]
+    column_mat[n-1] = -(h**2)*(r(ini_cond_2[0]-h)) + (1 - (h/2)*(p(ini_cond_2[0]-h)))*ini_cond_2[1]
+    for i in range(1, n-1):
+        column_mat[i] = -(h**2)*r(ini_cond_1[0]+(i+1)*h)
+
+    return linear_algebra.gauss_elimination(matrix, column_mat)
+
+
+    
+    
+
