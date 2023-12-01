@@ -10,8 +10,8 @@ MAX_FIXED_POINT_ITERATIONS = 100
 #---------------------------------------Initial value problems---------------------------------
 
 
-
-def euler_method(f, xy_o, h, final_x): #xy is [t, y] at initial point
+#xy is [t, y] at initial point
+def euler_method(f, xy_o, h, final_x): 
     xy = xy_o.copy()
     while abs(xy[0]-final_x) > REAL_COMPARISON_ERROR_TOLERANCE:
         xy[1] += h*f(xy)
@@ -27,7 +27,8 @@ def taylor_method_order2(f, ft_ffy, xy_o, h, final_x):
     return xy[1]
 
 
-def midpoint_method(f, xy_o, h, final_x): #runge_kutta_order2
+#runge_kutta_order2
+def midpoint_method(f, xy_o, h, final_x): 
     xy = xy_o.copy()
     while abs(xy[0]-final_x) > REAL_COMPARISON_ERROR_TOLERANCE:
         xy[1] += h*f([xy[0]+h/2, xy[1]+(h/2)*f(xy)])
@@ -35,7 +36,8 @@ def midpoint_method(f, xy_o, h, final_x): #runge_kutta_order2
     return xy[1]
 
 
-def modified_euler_method(f, xy_o, h, final_x):   #runge_kutta_order2
+#runge_kutta_order2
+def modified_euler_method(f, xy_o, h, final_x):   
     xy = xy_o.copy()
     while abs(xy[0]-final_x) > REAL_COMPARISON_ERROR_TOLERANCE:
         xy[1] += (h/2)*f(xy)+(h/2)*f([xy[0]+h, xy[1]+h*f(xy)])
@@ -54,8 +56,11 @@ def runge_kutta_order4(f, xy_o, h, final_x):
         xy[0] += h
     return xy[1]
 
-def adam_bashforth_order4(f, xy_o, h, final_x, *args): #if you are providing additional [ti, wi] 
-    xy = xy_o.copy()                                    #you must pass it like [[t1, w1], [t2, w2], [t3, w3]]
+
+#if you are providing additional [ti, wi] 
+#you must pass it like [[t1, w1], [t2, w2], [t3, w3]]
+def adam_bashforth_order4(f, xy_o, h, final_x, *args): 
+    xy = xy_o.copy()                                    
     if(len(args) == 0):                                
         xy0 = xy
         xy1 = [xy[0]+h, runge_kutta_order4(f, xy, h, xy[0]+h)]
@@ -79,8 +84,11 @@ def adam_bashforth_order4(f, xy_o, h, final_x, *args): #if you are providing add
     return xy3[1]
 
 
-def adam_moulton_order4(f, xy_o, h, final_x, *args):  #if you want to pass additional [ti, wi]
-    xy = xy_o.copy()                                  #you must pass it like [[t1, w1], [t2, w2], [t3, w3]]
+
+#if you want to pass additional [ti, wi]
+#you must pass it like [[t1, w1], [t2, w2], [t3, w3]]
+def adam_moulton_order4(f, xy_o, h, final_x, *args):  
+    xy = xy_o.copy()                                  
     if(len(args) == 0):                                
         xy0 = xy
         xy1 = [xy[0]+h, runge_kutta_order4(f, xy, h, xy[0]+h)]
@@ -104,8 +112,10 @@ def adam_moulton_order4(f, xy_o, h, final_x, *args):  #if you want to pass addit
     return xy2[1]
 
 
-def predictor_corrector(f, xy_o, h, final_x, *args):     #if you want to pass additional [ti, wi]
-    xy = xy_o.copy()                                    #you must pass it like [t1, w1], [t2, w2], [t3, w3]
+#if you want to pass additional [ti, wi]
+#you must pass it like [t1, w1], [t2, w2], [t3, w3]
+def predictor_corrector(f, xy_o, h, final_x, *args):     
+    xy = xy_o.copy()                                    
     if(len(args) == 0):                                 
         xy0 = xy
         xy1 = [xy[0]+h, runge_kutta_order4(f, xy, h, xy[0]+h)]
@@ -129,9 +139,13 @@ def predictor_corrector(f, xy_o, h, final_x, *args):     #if you want to pass ad
     return xy3[1]
 
     
-def runge_kutta_order4_for_multi_variable(f_list, xy_o, h, final_x): # xy_0 is [t0, x1, x2, ...] = u
-    xy = xy_o.copy()                                    # fi is the function related to xi
-    n = len(xy)                                          # each fi should take u as argument
+
+# xy_0 is [t0, x1, x2, ...] = u
+# fi is the function related to xi
+# each fi should take u as argument
+def runge_kutta_order4_for_multi_variable(f_list, xy_o, h, final_x): 
+    xy = xy_o.copy()                                    
+    n = len(xy)                                          
     while abs(xy[0]-final_x) > REAL_COMPARISON_ERROR_TOLERANCE:
         temp = [0]*n
 

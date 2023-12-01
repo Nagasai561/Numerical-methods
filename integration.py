@@ -17,6 +17,8 @@ def composite_rules(function_rule, function, a, b, num_intervals):
         result += function_rule(function, a+i*step_size, a+i*(step_size+1))
     return result
 
+
+# n is the degree of legendre polynomial that will be used
 def gaussian_rule(function, n):
     roots = [[-0.5773502692, 0.5773502692], [-0.7745966692, 0, 0.7745966692], [-0.8611363116, -0.3399810436, 0, 0.3399810436, 0.8611363116]]
     coefficients = [[1, 1], [0.55555556,0.88888889, 0.55555556], [0.3478548451, 0.6521451549, 0.6521451549, 0.3478548451]]

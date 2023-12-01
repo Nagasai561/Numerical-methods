@@ -5,11 +5,14 @@ import copy
 def add_mat(matrix1, matrix2):  #returns a new matrix
     if((len(matrix1) != len(matrix2))): #checking if number of rows aren't same
         raise Exception("Can't add two incompatible matrices")
+    
     elif(all(isinstance(x, list) for x in matrix1)):  #checking if matrix1 is a 2d matrix
         if(not all(isinstance(x, list) for x in matrix2)):    #Then matrix2 must also be a 2d matrix
             raise Exception("Can't add two incompatible matrices")
+        
         elif((len(matrix2[0]) != len(matrix1[0]))):     #checking if number of columns are same or not
             raise Exception("Can't add two incompatible matrices")
+        
         m = len(matrix1)
         n = len(matrix1[0])
         new_mat = [[0]*n]*m
